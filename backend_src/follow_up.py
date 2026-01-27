@@ -1,4 +1,5 @@
 import random
+import re
 from backend_src.prompt import prompt
 from backend_src.ai_factory import llm
 import sys
@@ -10,7 +11,8 @@ class Generate_follow_up:
 
     def generate(self)->str:
         try:
-            words = [w for w in self.user_input.split() if len(w) > 4]
+            words = re.findall(r'\b\w+\b', self.user_input)
+            words = [w for w in words if len(w) >=3]
             chosen_word = random.choice(words) if words else self.user_input.split()[0]
             
             chain =prompt| llm
@@ -19,6 +21,12 @@ class Generate_follow_up:
                 "word": chosen_word
             })
             
-            return response.content.strip()
+            return _clean_out(response.content)
         except Exception as e:
             return f"Error generating follow-up question: {str(e)}"
+        
+def _clean_out(text: str)-> str:
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
+    text = re.sub(r"\*\*|\*|`", "", text) 
+    text = re.sub(r"\s+", " ", text)  # Normalize whitespace
+    return text.strip()

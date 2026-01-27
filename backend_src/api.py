@@ -1,4 +1,4 @@
-from fastapi import FastAPI,WebSocket
+from fastapi import FastAPI,WebSocket, WebSocketDisconnect
 import sys
 import os
 
@@ -25,26 +25,41 @@ async def root():
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    
-    count = 0
-    last_message = ""
-    
-    while True:
-        user_message = await websocket.receive_text()
-        last_message = user_message
+    try:
+        await websocket.send_text("Connection established. You can start sending messages.")
         
-        if count < 3:
-            followup = Generate_follow_up(last_message).generate()
-            await websocket.send_text(followup)
-            count += 1
-        else:
-            await websocket.send_text("Thanks, we have got your data.")
-            await websocket.close()
-            break
+        first_message= await websocket.receive_text()
+        follow_up_generator = Generate_follow_up(first_message)
+        follow_up_question1 = follow_up_generator.generate()
+        await websocket.send_text(f'1. {follow_up_question1}')
+        
+        aswer1 = await websocket.receive_text()
+        follow_up_generator = Generate_follow_up(aswer1)
+        follow_up_question2 = follow_up_generator.generate()
+        await websocket.send_text(f'2. {follow_up_question2}')
+
+        aswer2 = await websocket.receive_text()
+        follow_up_generator = Generate_follow_up(aswer2)
+        follow_up_question3 = follow_up_generator.generate()
+        await websocket.send_text(f'3. {follow_up_question3}')
+        
+        aswer3 = await websocket.receive_text()
+
+        await websocket.send_text("Thanks, we have got your data.")
+    except WebSocketDisconnect:
+        print("Client disconnected")
+    except Exception as e:
+        await websocket.send_text(f"Error: {str(e)}")
+    finally:
+        try:
+            await websocket.close() 
+        except:
+            pass
+
 if __name__ == "__main__":
     uvicorn.run(
         "backend_src.api:app",
-        host="127.0.0.1",
+        host="0.0.0.0",
         port=8000,
         reload=True
     )
