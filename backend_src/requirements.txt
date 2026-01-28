@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+websocket-client
+python-dotenv
+langchain
+google-generativeai
+langchain-groq
+langchain-google-genai
