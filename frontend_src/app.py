@@ -31,7 +31,7 @@ if st.session_state.conversation_step == 0:
         try:
             # Connect to WebSocket
             ws = websocket.WebSocket()
-            ws.connect("ws://acadza-assignment-2.onrender.com/ws", timeout=10)#ws://localhost:8000/ws
+            ws.connect("wss://acadza-assignment-3.onrender.com/ws", timeout=10)#ws://localhost:8000/ws
             st.session_state.ws = ws
             
             # Receive welcome message

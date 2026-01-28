@@ -66,3 +66,4 @@ if __name__ == "__main__":
     )
 
 #uvicorn backend_src.api:app --reload
+#uvicorn backend_src.api:app --host 0.0.0.0 --port $PORT
