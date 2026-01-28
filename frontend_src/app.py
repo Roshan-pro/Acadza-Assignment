@@ -1,6 +1,5 @@
 import streamlit as st
 import websocket
-import json
 
 st.set_page_config(page_title="ACADZA Assignment", layout="centered")
 st.title("🤖 AI Follow-Up Assistant")
@@ -11,7 +10,7 @@ if "messages" not in st.session_state:
 if "ws" not in st.session_state:
     st.session_state.ws = None
 if "conversation_step" not in st.session_state:
-    st.session_state.conversation_step = 0  # 0: initial, 1-3: follow-ups, 4: done
+    st.session_state.conversation_step = 0  
 if "current_input" not in st.session_state:
     st.session_state.current_input = ""
 
@@ -22,9 +21,7 @@ for message in st.session_state.messages:
     else:
         st.markdown(f"**👤 You:** {message['content']}")
 
-# Main conversation logic
 if st.session_state.conversation_step == 0:
-    # Initial input
     user_input = st.text_input("Enter your initial sentence:", key="initial_input")
     
     if st.button("Launch") and user_input:
@@ -88,26 +85,21 @@ elif 1 <= st.session_state.conversation_step <= 3:
                 st.error(f"Error: {e}")
 
 elif st.session_state.conversation_step == 4:
-    # Conversation complete
     st.balloons()
     st.success("🎉 Conversation completed!")
     
     if st.button("Start New Conversation"):
-        # Clean up WebSocket
         if st.session_state.ws:
             try:
                 st.session_state.ws.close()
             except:
                 pass
         
-        # Reset session state
         for key in ["messages", "ws", "conversation_step", "current_input"]:
             if key in st.session_state:
                 del st.session_state[key]
         
         st.rerun()
-
-# WebSocket cleanup on page unload
 if st.session_state.ws and st.session_state.conversation_step == 4:
     try:
         st.session_state.ws.close()
